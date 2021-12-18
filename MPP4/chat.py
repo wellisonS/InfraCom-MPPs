@@ -11,11 +11,14 @@ class GUI:
         self.window.config(background='#1e1e1e')
         self.window.geometry('730x600+400+100')
 
-        self.canva = Canvas(self.window, width=200, height=200)
-        self.canva.grid(row=0,column=0,columnspan=2)
-        self.canva.place(x=10, y=10, width=710, height=530)
+        self.canva = Canvas(self.window, width=710, height=530)
+        #self.canva.grid(row=0,column=0,columnspan=2)
+        #self.canva.place(x=10, y=10, width=710, height=700)
+        self.canva.config(background='white')
+        self.canva.pack(side = TOP, padx = 10, pady = 10)
 
-        self.canva.pack()
+        global photoimage_list
+        photoimage_list = []
 
         self.createWidgets()
 
@@ -24,32 +27,34 @@ class GUI:
         font_tuple = ("Helvetica", 12, "bold")
 
         # text area 
-        self.txt_area = Text(self.window, border=1, background='#323232')
-        self.txt_area.place(x=10, y=10, width=710, height=530)
+        self.txt_area = Text(self.canva, border=0, background='#323232')
+        self.txt_area.config(width=670, height=40)
+        #self.txt_area.place(x=10, y=10, width=710, height=700)
+        self.txt_area.pack(side = TOP, padx = 0, pady = 0)
 
 
         # text field
         self.txt_field = Entry(self.window, width=26, background='#6c6c6c', foreground='white')
-        self.txt_field.place(x=10, y=550, width=400, height=44)
+        self.txt_field.place(x=10, y=545, width=400, height=44)
 
 
         # send button
         self.send_button = Button(self.window, width=9, height=2, relief='raised', state='active', pady=3, command=self.send)
         self.send_button.config(text='enviar', font=font_tuple, foreground='black')
-        self.send_button.place(x=415, y=550)
+        self.send_button.place(x=415, y=545)
 
 
         # clear button
         #trashPhoto=PhotoImage(file="trash_black.png")
         self.trashButton = Button(self.window, width=9, height=2, relief='raised', state='active', pady=3, command=self.clear)
         self.trashButton.config(text='apagar', font=font_tuple, background='red')
-        self.trashButton.place(x=622, y=550)
+        self.trashButton.place(x=622, y=545)
 
 
         # select file button
         self.selectButton = Button(self.window, width=9, height=2, relief='raised', state='active', pady=3, command=self.files)
         self.selectButton.config(text='anexo', font=font_tuple, foreground='black')
-        self.selectButton.place(x=519, y=550)
+        self.selectButton.place(x=519, y=545)
 
         
         # key return/enter
@@ -60,9 +65,9 @@ class GUI:
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-        texto = self.txt_field.get() + '\n'
+        texto = self.txt_field.get() + '\n\n'
 
-        if texto == '\n':
+        if texto == '\n\n':
             self.txt_field.delete(0, END)
         else:
             tempMessage = "[{}]: {}".format(dt_string, texto)
@@ -75,16 +80,19 @@ class GUI:
 
 
     def files(self, event=None):
+        global my_image
+        global photoimage_list
         filename = filedialog.askopenfilename(initialdir="/", title="Selecione um arquivo", filetypes=(("png files", "*.png"), ("jpg files", "*.jpg"), ("mp3 files", "*.mp3"), ("mp4 files", "*.mp4"), ("mov files", "*.mov")))
-        my_image = ImageTk.PhotoImage(Image.open(filename))
-        my_label = Label(image = my_image)
-        my_label.pack()
+        my_image = ImageTk.PhotoImage(Image.open(filename).resize((200, 200), Image.ANTIALIAS))
+        photoimage_list.append(my_image)
 
-        
-    
-        #my_label = Label(self.window, text=self.window.filename).pack()
-        #my_image = ImageTk.PhotoImage(Image.open(self.window.filename))
-        #my_image_label = Label(image=my_image).pack()
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        tempMessage = "[{}]: {}".format(dt_string, "\n")
+
+        self.txt_area.insert(END, tempMessage)
+        self.txt_area.image_create(END, image=my_image)
+        self.txt_area.insert(END, "\n\n")
 
     
     def start(self):

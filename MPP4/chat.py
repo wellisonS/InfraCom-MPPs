@@ -3,6 +3,10 @@ from datetime import datetime
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from PIL import ImageTk, Image
+import numpy as np
+import cv2 
+import os
+
 
 class GUI:
     def __init__(self, largura, altura):
@@ -22,7 +26,6 @@ class GUI:
 
         self.createWidgets()
 
-    
     def createWidgets(self):
         font_tuple = ("Helvetica", 12, "bold")
 
@@ -82,23 +85,45 @@ class GUI:
     def files(self, event=None):
         global my_image
         global photoimage_list
-        filename = filedialog.askopenfilename(initialdir="/", title="Selecione um arquivo", filetypes=(("png files", "*.png"), ("jpg files", "*.jpg"), ("mp3 files", "*.mp3"), ("mp4 files", "*.mp4"), ("mov files", "*.mov")))
-        my_image = ImageTk.PhotoImage(Image.open(filename).resize((200, 200), Image.ANTIALIAS))
-        photoimage_list.append(my_image)
 
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
         tempMessage = "[{}]: {}".format(dt_string, "\n")
 
-        self.txt_area.insert(END, tempMessage)
-        self.txt_area.image_create(END, image=my_image)
-        self.txt_area.insert(END, "\n\n")
+        filename = filedialog.askopenfilename(initialdir="/", title="Selecione um arquivo", filetypes=(("png files", "*.png"), ("jpg files", "*.jpg"), ("mp3 files", "*.mp3"), ("mp4 files", "*.mp4"), ("mov files", "*.mov")))
+        arquivo, extn = os.path.splitext(filename)
 
-    
+        if extn == '.png' or extn == '.jpg':
+            my_image = ImageTk.PhotoImage(Image.open(filename).resize((200, 200), Image.ANTIALIAS))
+            photoimage_list.append(my_image)
+            self.txt_area.insert(END, tempMessage)
+            self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
+            self.txt_area.image_create(END, image=my_image)
+            self.txt_area.insert(END, "\n\n")
+
+        elif extn == '.mov' or extn == '.mp4':
+            self.txt_area.insert(END, tempMessage)
+            self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
+            cap = cv2.VideoCapture(filename)
+            while (True):
+                ret, frame = cap.read()
+                frame = cv2.resize(frame, (640, 360))
+                cv2.imshow('video play', frame)
+                if (cv2.waitKey(1) & 0xFF == ord('q')):
+                    break
+            self.txt_area.insert(END, "\n\n")
+
+        elif extn == '.mp3':
+            self.txt_area.insert(END, tempMessage)
+            self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
+            # adicionar codigo de musica aqui
+            self.txt_area.insert(END, "\n\n")
+
+
+
     def start(self):
         self.window.mainloop()
         
-
 
 
 if __name__ == '__main__':

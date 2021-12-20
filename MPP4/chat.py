@@ -6,6 +6,9 @@ from PIL import ImageTk, Image
 import numpy as np
 import cv2 
 import os
+from tkvideo import tkvideo
+import pygame
+
 
 
 class GUI:
@@ -104,13 +107,23 @@ class GUI:
         elif extn == '.mov' or extn == '.mp4':
             self.txt_area.insert(END, tempMessage)
             self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
-            cap = cv2.VideoCapture(filename)
-            while (True):
-                ret, frame = cap.read()
-                frame = cv2.resize(frame, (640, 360))
-                cv2.imshow('video play', frame)
-                if (cv2.waitKey(1) & 0xFF == ord('q')):
-                    break
+
+
+
+
+            video_label = Label(self.window)
+            #video_label.pack()
+            player = tkvideo(filename, video_label, loop = 1, size = (640,360))
+            player.play()
+            self.txt_area.window_create(END, window= video_label)
+
+            # cap = cv2.VideoCapture(filename)
+            # while (True):
+            #     ret, frame = cap.read()
+            #     frame = cv2.resize(frame, (640, 360))
+            #     cv2.imshow('video play', frame)
+            #     if (cv2.waitKey(1) & 0xFF == ord('q')):
+            #         break
             self.txt_area.insert(END, "\n\n")
 
         elif extn == '.mp3':

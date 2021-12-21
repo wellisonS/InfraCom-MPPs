@@ -1,11 +1,13 @@
 from tkinter import *
 from datetime import datetime
+from tkinter import font
 import tkinter.ttk as ttk
 from tkinter import filedialog
 from PIL import ImageTk, Image
 import numpy as np
 import cv2 
 import os
+#from pygame.music import play
 from tkvideo import tkvideo
 import pygame
 
@@ -26,6 +28,9 @@ class GUI:
 
         global photoimage_list
         photoimage_list = []
+        global filename
+
+        pygame.mixer.init()
 
         self.createWidgets()
 
@@ -88,6 +93,7 @@ class GUI:
     def files(self, event=None):
         global my_image
         global photoimage_list
+        global filename
 
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -130,7 +136,25 @@ class GUI:
             self.txt_area.insert(END, tempMessage)
             self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
             # adicionar codigo de musica aqui
+
+            audio_label = Label(self.window, width=200, height=100)
+            playAudioButton = Button(audio_label, text="play", font=('Helvetica', 20),  command= self.playAudio)
+            playAudioButton.pack(side = LEFT, padx = 0, pady = 0)
+            stopAudioButton = Button(audio_label, text="pause", font=('Helvetica', 20),  command= self.stopAudio)
+            stopAudioButton.pack(side = RIGHT, padx = 0, pady = 0)
+
+            self.txt_area.window_create(END, window= audio_label)
             self.txt_area.insert(END, "\n\n")
+
+
+    def playAudio(self):
+        global filename
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play(loops=0)
+        print("socorro deus entrou aqui")
+
+    def stopAudio(self):
+        pygame.mixer.music.stop()
 
 
 

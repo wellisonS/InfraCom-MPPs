@@ -8,6 +8,7 @@ import os
 from tkvideo import tkvideo
 import socket
 import threading
+import pygame #py -m pip install -U pygame --user
 
 SERVER = ('localhost', 55555)
 myPort = int(input("Digite a porta: "))
@@ -29,14 +30,15 @@ class Client:
         self.canva.pack(side = TOP, padx = 10, pady = 10)
 
         self.gui_done = False
+        pygame.mixer.init()
 
         global photoimage_list
+        global filename
         photoimage_list = []
 
         self.otherPort = self.get_other_user_port()
         self.createWidgets()
         
-
         listener = threading.Thread(target = self.listen)
         listener.start()
 
@@ -97,6 +99,8 @@ class Client:
             if self.gui_done:
                 data = self.sock.recv(1024)
                 self.txt_area.insert(END, data.decode('utf-8'))
+
+       
     
     def clear(self, event=None):
         self.txt_area.delete(1.0, END)
@@ -105,6 +109,7 @@ class Client:
     def files(self, event=None):
         global my_image
         global photoimage_list
+        global filename
 
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -118,11 +123,12 @@ class Client:
         if extn == '.png' or extn == '.jpg':
             my_image = ImageTk.PhotoImage(Image.open(filename).resize((200, 200), Image.ANTIALIAS))
             photoimage_list.append(my_image)
+
             self.txt_area.insert(END, tempMessage)
             self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
             self.txt_area.image_create(END, image=my_image)
             self.txt_area.insert(END, "\n\n")
-            self.sock.sendto(bytes(my_image), ('localhost', self.otherPort))
+
 
         elif extn == '.mov' or extn == '.mp4':
             
@@ -142,9 +148,24 @@ class Client:
             self.txt_area.insert(END, tempMessage)
             self.txt_area.insert(END, "Arquivo {} enviado.\n".format(extn))
             # adicionar codigo de musica aqui
+
+            audio_label = Label(self.window, width=200, height=100)
+            playAudioButton = Button(audio_label, text="play", font=('Helvetica', 20),  command= self.playAudio)
+            playAudioButton.pack(side = LEFT, padx = 0, pady = 0)
+            stopAudioButton = Button(audio_label, text="pause", font=('Helvetica', 20),  command= self.stopAudio)
+            stopAudioButton.pack(side = RIGHT, padx = 0, pady = 0)
+
+            self.txt_area.window_create(END, window= audio_label)
             self.txt_area.insert(END, "\n\n")
 
 
+    def playAudio(self):
+        global filename
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play(loops=0)
+        
+    def stopAudio(self):
+        pygame.mixer.music.stop()
 
     def start(self):
         self.window.mainloop()
